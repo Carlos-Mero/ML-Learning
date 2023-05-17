@@ -89,7 +89,7 @@ $$p(x)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right
 
 最终我们可以通过`matplotlib`绘制得出如下所示的正态分布曲线：
 
-![Normal Distribution](https://cdn.jsdelivr.net/gh/Yellow-GGG/Pics@main/ml4zce.png)
+![Normal Distribution](https://cdn.jsdelivr.net/gh/Yellow-GGG/Pics@main/ml4zce.png =700x)
 
 我们通常会认定我们对于数据的观测值中包含了一个随机的误差项，即“噪声”。而这个噪声项通常服从正态分布。
 后面我们可能会经常用到这些。
