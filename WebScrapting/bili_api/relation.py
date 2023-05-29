@@ -30,6 +30,7 @@ def plot_corr(corr):
 
 if __name__ == "__main__":
     df = pd.read_csv("bili-refined.csv")
+    df = df[df["视频时长"] <= 3600]
     corr = df.corr(numeric_only=True)
     show_corr(corr)
     plot_corr(corr)

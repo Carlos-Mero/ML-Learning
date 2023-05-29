@@ -83,6 +83,8 @@ def draw_bar_chart(data_mean, data_median):
 
 def calc_stat(data):
     """用于计算各种整体上的统计量"""
+
+    data = data[data["视频时长"] <= 3600]
     data_mean = data.mean(numeric_only=True).to_numpy()
     data_median = data.median(numeric_only=True).to_numpy()
     print(data_median[3])
@@ -90,5 +92,5 @@ def calc_stat(data):
 
 
 if __name__ == "__main__":
-    data = pd.read_csv("bili.csv")
-    refining_data(data)
+    data = pd.read_csv("bili-refined.csv")
+    calc_stat(data)
