@@ -258,7 +258,69 @@ def data_domain(data):
     fig.legend(loc='upper left', bbox_to_anchor=(0.13, 0.87))
     ax_duration.set_title("分区宏观数据")
 
-    plt.savefig("data-domain.png", format="png", dpi=300)
+    # plt.savefig("data-domain.png", format="png", dpi=300)
+
+    likes_mean = grp_data["点赞数"].mean()
+    likes_median = grp_data["点赞数"].median()
+    coins_mean = grp_data["投币数"].mean()
+    coins_median = grp_data["投币数"].median()
+
+    fig1, ax_like = plt.subplots()
+    ax_coins = ax_like.twinx()
+
+    ax_like.bar(
+        index, likes_mean, bar_width, color="#EAB1D2",
+        alpha=0.8, label="点赞量平均数")
+    ax_like.bar(
+        index, likes_median, bar_width, color="#A44A7E",
+        alpha=0.7, label="点赞量中位数")
+    ax_coins.bar(
+        index+bar_width+0.03, coins_mean, bar_width, color="#C3D69C",
+        alpha=0.9, label="硬币量平均数")
+    ax_coins.bar(
+        index+bar_width+0.03, coins_median, bar_width, color="#79953E",
+        alpha=0.7, label="硬币量中位数")
+
+    ax_like.set_xticks(index + bar_width/2 + 0.015)
+    ax_like.set_xticklabels(x_labels, rotation=30)
+    ax_like.set_xlabel("视频分区")
+    ax_like.set_ylabel("点赞数量/个")
+    ax_coins.set_ylabel("硬币数量/个")
+    fig1.legend(loc='upper left', bbox_to_anchor=(0.13, 0.87))
+    ax_like.set_title("分区质量指标")
+
+    # plt.savefig("quality-domain.png", format="png", dpi=300)
+
+    danmaku_mean = grp_data["弹幕数"].mean()
+    danmaku_median = grp_data["弹幕数"].median()
+    comment_mean = grp_data["评论数"].mean()
+    comment_median = grp_data["评论数"].median()
+
+    fig2, ax_danmaku = plt.subplots()
+    ax_comment = ax_danmaku.twinx()
+
+    ax_danmaku.bar(
+        index, danmaku_mean, bar_width, color="#B0B9D2",
+        alpha=0.6, label="弹幕数平均值")
+    ax_danmaku.bar(
+        index, danmaku_median, bar_width, color="#6C87D0",
+        alpha=0.9, label="弹幕数中位数")
+    ax_comment.bar(
+        index+bar_width+0.03, comment_mean, bar_width, color="#EFD0B5",
+        alpha=0.6, label="评论数平均值")
+    ax_comment.bar(
+        index+bar_width+0.03, comment_median, bar_width, color="#E2A470",
+        alpha=0.9, label="评论数中位数")
+
+    ax_danmaku.set_xticks(index + bar_width/2 + 0.015)
+    ax_danmaku.set_xticklabels(x_labels, rotation=30)
+    ax_danmaku.set_xlabel("视频分区")
+    ax_danmaku.set_ylabel("弹幕数/条")
+    ax_comment.set_ylabel("评论数/个")
+    fig2.legend(loc='upper left', bbox_to_anchor=(0.13, 0.87))
+    ax_danmaku.set_title("分区质量指标")
+
+    plt.savefig("quality1-domain.png", format="png", dpi=300)
 
     plt.show()
 
