@@ -9,16 +9,12 @@ include_directories(
 	./include
 	)
 include_directories(
-	/usr/local/include
-	/opt/local/include
 	/opt/homebrew/include
 	)
 
 link_directories(
-        /usr/local/lib
-        /opt/local/lib
-        /opt/homebrew/lib
-    )
+	/opt/homebrew/lib
+	)
 
 file(
 	GLOB srcs
@@ -32,8 +28,9 @@ add_executable(c ${srcs})
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(fmt_dep REQUIRED IMPORTED_TARGET fmt)
-pkg_check_modules(opencv REQUIRED IMPORTED_TARGET opencv4)
 find_package(Torch REQUIRED)
+find_package(TorchVision REQUIRED)
+find_package(OpenCV REQUIRED)
 
 target_include_directories(c PUBLIC
 	${PROJECT_BINARY_DIR}
@@ -42,8 +39,12 @@ target_include_directories(c PUBLIC
 
 target_link_libraries(c PUBLIC
 	PkgConfig::fmt_dep
-	PkgConfig::opencv	
 	Torch
+	TorchVision
 	${TORCH_LIBRARIES}
 	${OpenCV_LIBS}
 	)
+
+install(TARGETS c DESTINATION bin)
+install(DIRECTORY ${TORCH_INSTALL_PREFIX}/lib/ DESTINATION bin)
+install(DIRECTORY ${OpenCV_INSTALL_PATH}/lib/ DESTINATION bin)

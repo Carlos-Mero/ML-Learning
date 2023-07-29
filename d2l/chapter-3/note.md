@@ -42,6 +42,7 @@ $$\mathrm{ReLU}(x) = \max(x, 0)$$
 简而言之它就是舍弃掉所有的负项而仅仅保留正数。
 计算起来相当快捷而且能够提供所需的非线性性。
 效果优良，因而也被人们广泛采用。
+甚至可以被称作是一个「伟大的创造」。
 
 ReLU函数同时也存在着许多变体，比如说带参数的pReLU函数，Leaky ReLU函数等等。
 例如pReLU函数的定义为
@@ -102,3 +103,20 @@ $$\tanh(x) = \frac{\exp(x) - \exp(-x)}{\exp(x) + \exp(-x)}$$
 
 这里我们通过多项式回归测试一下过拟合现象的存在。
 具体代码放在`poly.py`当中。
+
+### Forward & Backward
+
+The automatic calculation of the gradients profoundly simplifies the
+implementation of deep learning, while the implementation of the automatic
+gradients itself be hidden behind the deep learning framework.
+
+**Forward Propagation** is the main part we will focus on in a deeplearning
+model.
+As we're going through the forward propagation, the framework automaticly
+marks down the paths we'll travelled and draws a **computational graph** of the
+model. Then, by applying the chain rule of gradients and seperately calculating
+each gradient of the layers, we can easily obtain the required gradient.
+
+A typical computational graph would look like this:
+
+![](../_static/forward.svg)

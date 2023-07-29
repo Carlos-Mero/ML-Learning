@@ -11,18 +11,17 @@ using namespace torch;
 int main(int argc, char** argv) {
 	std::ios::sync_with_stdio(false);
 	fmt::println("The main function is called here.");
-	auto v = torch::randn({3, 4});
-	std::cout << v << std::endl;
 
-	auto net = TestNet(4, 3);
-	std::cout << net.forward(v) << std::endl;
+	auto sm_reg = SoftmaxClassification();
+	std::cout << sm_reg << std::endl;
+	sm_reg.train_process();
 
-	auto model = TestModel();
-	std::cout << model.forward(net.forward(v)) << std::endl;
+//	torch::save(
+//			sm_reg.covseq, "../models/SoftmaxClassification_covseq.pt");
+//	torch::save(
+//			sm_reg.linreluseq, "../models/SoftmaxClassification_linreluseq.pt");
 
-	auto v2 = torch::randn(3);
-	auto relustack = ReLUStack(3, 4);
-	std::cout << relustack.forward(v2) << std::endl;
-	std::cout << relustack << std::endl;
+	fmt::println("-----------------------------------");
+	fmt::println("Done! The final result seems great!");
 	return 0;
 }
