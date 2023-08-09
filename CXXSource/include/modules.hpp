@@ -3,6 +3,8 @@
 
 #include <cstddef>
 #include <memory>
+#include <vector>
+#include <string>
 #include <torch/torch.h>
 #include <fmt/core.h>
 
@@ -82,6 +84,27 @@ struct ConvLinStack: nn::Module {
 	nn::Sequential linreluseq;
 };
 
+struct LinDropoutStack: nn::Module {
+	LinDropoutStack(int64_t Numinput, int64_t Numoutput)
+		: seq (
+				nn::Flatten(),
+				nn::Linear(Numinput, 320),
+				nn::ReLU(),
+				nn::Dropout(0.5),
+				nn::Linear(320, 240),
+				nn::ReLU(),
+				nn::Dropout(0.5),
+				nn::Linear(240, Numoutput),
+				nn::LogSoftmax(1)
+				) {
+			register_module("seq", seq);
+		}
+	auto forward(torch::Tensor x) {
+		return seq->forward(x);
+	}
+	nn::Sequential seq;
+};
+
 class LinearRegression: public nn::Module {
 	public:
 		static const int64_t input_dim;
@@ -105,12 +128,36 @@ class SoftmaxClassification: public ConvLinStack {
 		static const int64_t output_dim;
 		const char* data_path;
 		std::unique_ptr<torch::optim::SGD> sgd_optimizer;
+		std::vector<double> test_loss_set;
+		std::vector<double> test_accuracy;
 
 		void train_process();
 		void test_process();
 		//SoftmaxClassification(int64_t M, int64_t N);
 		SoftmaxClassification();
 		~SoftmaxClassification();
+};
+
+template<typename T>
+class TrainerOnMPS {
+	private:
+		torch::Device device;
+		std::string data_path;
+		std::unique_ptr<torch::optim::SGD> sgd_optimizer;
+		std::unique_ptr<T> model;
+		int64_t kNumsofEpochs;
+		double learning_rate;
+		double momentum;
+		std::vector<double> train_losses;
+		std::vector<double> train_accuracys;
+		std::vector<double> test_losses;
+		std::vector<double> test_accuracys;
+
+	public:
+		void train_process();
+		void test_process();
+		TrainerOnMPS(std::unique_ptr<T> mod, int64_t epochs, double lr, double mtum);
+		~TrainerOnMPS();
 };
 
 }

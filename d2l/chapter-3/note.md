@@ -120,3 +120,78 @@ each gradient of the layers, we can easily obtain the required gradient.
 A typical computational graph would look like this:
 
 ![](../_static/forward.svg)
+
+Note that there is only one tensor at the end of the computational graph,
+which is the output of the model.
+And both input value and the paramaters are located at the entrance of the
+whole graph.
+And in the sense of a probability model they are actually considered the same
+thing.
+
+### Numerical Stability and Initialization
+
+Initializing the paramaters to some distributions is a must when implementing
+a model. But rather than making a arbitrary choice on the start point,
+a deligent choice on paramaters concering the corresponding nonlinear
+activation function or something will work much better.
+That means better numerical stability, and faster convergence.
+
+We may be confronted with the possible conditions, vanishing gradients or
+exploding gradients, seperately for the case when the gradients be too small
+or too large. Which would cause the optimization process to be blocked,
+or some unexpected behavior of the model.
+
+**Numerical Stability** just aims to avoiding such cases.
+
+### Generalization in Deep Learning
+
+**Generalization** is always the central problem concered by machine learning.
+While the underlying theory of such ability hiding still, we've got a lot
+practical prior on such topic.
+
+Deep neural networks are capable of fitting arbitrary labels, even when
+labels are assigned incorrectly or randomly.
+But the unwelcoming behavior only exists when we've put the model training
+for a long time.
+
+A wildly used method to prevent such kind of overfitting is called
+**early stopping**, meaning to stop training earlier so that the model won't
+remember too much trash information.
+
+The correctness of early stopping method is guaranteed by a lot of recent
+work, revealing that the model tend to fit the fine data first, and
+ignoring the mislabeled ones.
+And if a model has fitted the cleanly labeled data, it has generalized already.
+
+Notably, when there is no label noise and datasets are realizable (the classes 
+are truly separable, e.g., distinguishing cats from dogs), early stopping tends 
+not to lead to significant improvements in generalization. On the other hand, 
+when there is label noise, or intrinsic variability in the label (e.g., 
+predicting mortality among patients), early stopping is crucial. Training models 
+until they interpolate noisy data is typically a bad idea.
+
+### Dropout (暂退法)
+
+We should aim for a **simpler model** whenever we can without significant
+impact on the performance.
+Here, simplicity can mean a smaller set of paramaters, or simpler
+representation of the model, or faster infering etc.
+
+**Dropout** method involves injecting noise while computing each internal
+layer during forward propagation, and it has bacome a standard technique for
+training neural networks, as a method of regularization.
+
+Here, the smoothness is guaranteed since the model trained with dropout tend to
+perform well even when there're lots of random noise between layers.
+
+The most common idea is to inject the noise in an unbiased manner so that the
+expected value of each layer won't be changed.
+Adding Gaussian noise to the inputs is the original way of dropout, but nowadays
+the standard dropout regularization choices to use a much simpler way.
+Which also guarantees zero mean, while being quite efficient to calculate.
+
+$$h'=\begin{cases}0 & \text{with probability }p\\\frac h{1-p} & \text{otherwise}\end{cases}$$
+
+Typically we disable dropout at test time, except for some special purposed usage.
+
+We implemented a small model using the dropout method with `libtorch` in C++.

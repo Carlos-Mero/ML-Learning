@@ -12,9 +12,10 @@ int main(int argc, char** argv) {
 	std::ios::sync_with_stdio(false);
 	fmt::println("The main function is called here.");
 
-	auto sm_reg = SoftmaxClassification();
-	std::cout << sm_reg << std::endl;
-	sm_reg.train_process();
+	auto trainer = TrainerOnMPS<LinDropoutStack>(
+			std::make_unique<LinDropoutStack>(28*28, 10), 10, 0.01, 0.5);
+	fmt::println("The trainer is initialized!");
+	trainer.train_process();
 
 //	torch::save(
 //			sm_reg.covseq, "../models/SoftmaxClassification_covseq.pt");
