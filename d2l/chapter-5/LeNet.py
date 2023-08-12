@@ -87,7 +87,7 @@ def test(dataloader):
 if __name__ == "__main__":
     print("Now using model:")
     print(model)
-    epoches = 20
+    epoches = 100
     for epoch in range(epoches):
         print(f"Epoch: {epoch}:\n----------------------------------------")
         train(train_dataloader)
