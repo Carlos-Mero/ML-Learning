@@ -12,8 +12,11 @@ int main(int argc, char** argv) {
 	std::ios::sync_with_stdio(false);
 	fmt::println("The main function is called here.");
 
-	auto trainer = TrainerOnMPS<LinDropoutStack>(
-			std::make_unique<LinDropoutStack>(28*28, 10), 10, 0.01, 0.5);
+  int64_t num_classes = 10;
+
+	auto trainer = TrainerOnMPS<ResNetOnMNIST>(
+			std::make_shared<ResNetOnMNIST>(num_classes), 10, 0.01, 0.5,
+      static_cast<const char*>("../data/FashionMNIST/raw"));
 	fmt::println("The trainer is initialized!");
 	trainer.train_process();
 

@@ -181,7 +181,8 @@ void SoftmaxClassification::test_process() {
 
 template<typename T>
 TrainerOnMPS<T>::TrainerOnMPS(
-		std::unique_ptr<T> mod, int64_t epochs, double lr, double mtum)
+		std::shared_ptr<T> mod, int64_t epochs, double lr, double mtum,
+    const char* MNIStpath)
 	: model(std::move(mod)),
 	device(torch::kMPS),
 	kNumsofEpochs(epochs),
@@ -192,7 +193,8 @@ TrainerOnMPS<T>::TrainerOnMPS(
 				torch::optim::SGDOptions(learning_rate).momentum(mtum)
 			);
 	model->to(device);
-	data_path = "../data/FashionMNIST/raw";
+	data_path = MNIStpath;
+  register_module("model", model);
 
 	fmt::println("Now we're training on model with MPS backends:");
 	std::cout << *model << std::endl;
@@ -260,6 +262,10 @@ void TrainerOnMPS<T>::train_process() {
 				epoch,
 				test_losses[epoch]);
 	}	
+
+  torch::save(
+    model, "../models/MNISTClassification.pt");
+
 }
 
 template<typename T>
@@ -300,5 +306,6 @@ void TrainerOnMPS<T>::test_process() {
 }
 
 template class torch::TrainerOnMPS<LinDropoutStack>;
+template class torch::TrainerOnMPS<ConvLinStack>;
 
 }

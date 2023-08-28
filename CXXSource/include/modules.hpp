@@ -138,13 +138,126 @@ class SoftmaxClassification: public ConvLinStack {
 		~SoftmaxClassification();
 };
 
+class MNISTClassification: public nn::Module {
+  public:
+    static constexpr int64_t input_dim = 28*28;
+    static constexpr int64_t output_dim = 10;
+    const char* data_path;
+
+    auto forward(torch::Tensor x);
+    MNISTClassification()
+      : seq (
+          nn::Conv2d(nn::Conv2dOptions(1, 2, 3).padding(1).stride(1))
+          ) {
+        register_module("seq", seq);
+      }
+    ~MNISTClassification();
+
+    nn::Sequential seq;
+};
+
+class ResBlock: public nn::Module {
+  public:
+    ResBlock(int64_t in_channels, int64_t out_channels, int64_t stride=1)
+      : layers_(
+          nn::Conv2d(
+            nn::Conv2dOptions(in_channels, out_channels, 3).stride(stride).padding(1)),
+          nn::BatchNorm2d(out_channels),
+          nn::ReLU(true),
+          nn::Conv2d(
+            nn::Conv2dOptions(out_channels, out_channels, 3).stride(1).padding(1)),
+          nn::BatchNorm2d(out_channels)
+          ) {
+      if (stride != 1 || in_channels != out_channels) {
+        shortcut_ = nn::Sequential(
+              nn::Conv2d(
+                nn::Conv2dOptions(in_channels, out_channels, 1).stride(stride)),
+              nn::BatchNorm2d(out_channels)
+            );
+      } else {
+        shortcut_ = nullptr;
+      }
+      // register_module
+    }
+
+    auto forward(torch::Tensor x) {
+      auto res = x;
+      x = layers_->forward(x);
+      if (shortcut_) {
+        res = shortcut_->forward(res);
+      }
+      x += res;
+      x = torch::relu(x);
+      return x;
+    }
+
+  private:
+    nn::Sequential layers_;
+    nn::Sequential shortcut_;
+
+};
+
+class ResNetOnMNIST: public nn::Module {
+  public:
+    ResNetOnMNIST(int num_classes) {
+      int64_t in_channels = 1;
+      int64_t out_channels = 4;
+      std::vector<int64_t> block_repeats{2, 2, 2};
+
+      layers_->push_back(nn::Conv2d(
+            nn::Conv2dOptions(in_channels, out_channels, 5).stride(1).padding(2)));
+      layers_->push_back(nn::BatchNorm2d(out_channels));
+      layers_->push_back(nn::ReLU(true));
+      layers_->push_back(nn::MaxPool2d(2));
+
+      in_channels = out_channels;
+
+      for (const auto& repeats: block_repeats) {
+        out_channels *= 2;
+        layers_->push_back(make_layer(in_channels, out_channels, repeats, 1));
+        in_channels = out_channels;
+      }
+
+      layers_->push_back(nn::AdaptiveAvgPool2d(1));
+      layers_->push_back(nn::Flatten());
+      layers_->push_back(nn::Linear(out_channels, num_classes));
+      
+      int64_t l_count = 0;
+
+      for (auto layer: *layers_) {
+        register_module(std::to_string(l_count),
+            std::make_shared<nn::AnyModule>(layer));
+        l_count++;
+      }
+    }
+
+    auto forward(torch::Tensor x) {
+      for (auto& layer: *layers_) {
+        x = layer.forward(x);
+      }
+      return x;
+    }
+
+  private:
+    nn::Sequential make_layer(
+        int64_t in_channels, int64_t out_channels, int64_t num_blocks, int64_t stride){
+      nn::Sequential layers;
+      layers->push_back(ResBlock(in_channels, out_channels, stride));
+      for (int64_t i = 1; i < num_blocks; ++i) {
+        layers->push_back(ResBlock(out_channels, out_channels, 1));
+      }
+      return layers;
+    }
+    nn::Sequential layers_;
+};
+
 template<typename T>
-class TrainerOnMPS {
+class TrainerOnMPS: public nn::Module {
 	private:
 		torch::Device device;
 		std::string data_path;
 		std::unique_ptr<torch::optim::SGD> sgd_optimizer;
-		std::unique_ptr<T> model;
+		std::shared_ptr<T> model;
 		int64_t kNumsofEpochs;
 		double learning_rate;
 		double momentum;
@@ -156,7 +269,9 @@ class TrainerOnMPS {
 	public:
 		void train_process();
 		void test_process();
-		TrainerOnMPS(std::unique_ptr<T> mod, int64_t epochs, double lr, double mtum);
+		TrainerOnMPS(
+        std::shared_ptr<T> mod, int64_t epochs,
+        double lr, double mtum, const char* MNIStpath);
 		~TrainerOnMPS();
 };
 
