@@ -76,7 +76,7 @@ class DenseNet(nn.Module):
 model = DenseNet().to(device)
 
 loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.005, momentum=0.5,dampening=0.5)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.002, momentum=0.5, dampening=0.5)
 
 def train():
     size = len(train_dataset)
