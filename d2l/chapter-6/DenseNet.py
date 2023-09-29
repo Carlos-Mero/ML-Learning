@@ -32,7 +32,7 @@ class DenseBlock(nn.Module):
     def __init__(self, num_convs, num_channels):
         super().__init__()
         layer = []
-        for i in range(num_convs):
+        for _ in range(num_convs):
             layer.append(conv_blocks(num_channels))
         self.net = nn.Sequential(*layer)
     def forward(self, X):
@@ -53,7 +53,7 @@ class DenseNet(nn.Module):
                  num_classes=10):
         super().__init__()
         self.net = nn.Sequential(
-            nn.LazyConv2d(64, kernel_size=5, stride=1, padding=2),
+            nn.LazyConv2d(num_channels, kernel_size=5, stride=1, padding=2),
             nn.LazyBatchNorm2d(), nn.ReLU(),
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         )
@@ -76,7 +76,7 @@ class DenseNet(nn.Module):
 model = DenseNet().to(device)
 
 loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.005, momentum=0.5,dampening=0.5)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.005, momentum=0.5, dampening=0.5)
 
 def train():
     size = len(train_dataset)
