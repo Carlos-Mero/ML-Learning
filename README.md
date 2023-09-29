@@ -7,4 +7,5 @@
 * d2l，动手学深度学习。（开源于[GitHub页面](https://github.com/d2l-ai/d2l-zh)）
 * Mathematics for Machine Learning。（开源于[GitHub页面](https://github.com/mml-book/mml-book.github.io)）
 * Pattern Recognition and Machine Learning (Christopher M. Bishop)
-* Maching Learning A Probablistic Perspective (Kevin P. Murphy)
+* Maching Learning A Probabilistic Perspective (Kevin P. Murphy)
+* Probabilistic Machine Learning An Introduction (Kevin P. Murphy)
