@@ -131,8 +131,11 @@ dmypy.json
 # Data sets
 d2l/data/
 data/
+pyprobml-0.1.0/
 *.csv
 *.html
 
 # Build
 build/
+d2l/d2l-en/
+d2l/data/
