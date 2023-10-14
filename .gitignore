@@ -139,3 +139,5 @@ pyprobml-0.1.0/
 build/
 d2l/d2l-en/
 d2l/data/
+CXXSource/data/
+CXXSource/models/

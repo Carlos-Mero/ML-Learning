@@ -22,61 +22,30 @@ test_dataset = datasets.MNIST(
 train_loader = DataLoader(train_dataset, batch_size=batch_size)
 test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
-def conv_blocks(num_channels):
-    return nn.Sequential(
-        nn.LazyBatchNorm2d(), nn.ReLU(),
-        nn.LazyConv2d(num_channels, kernel_size=3, padding=1)
-    )
-
-class DenseBlock(nn.Module):
-    def __init__(self, num_convs, num_channels):
+class tsMNIST(nn.Module):
+    def __init__(self):
         super().__init__()
-        layer = []
-        for _ in range(num_convs):
-            layer.append(conv_blocks(num_channels))
-        self.net = nn.Sequential(*layer)
-    def forward(self, X):
-        for blk in self.net:
-            Y = blk(X)
-            X = torch.cat((X, Y), dim=1)
-        return X
-
-def transition_block(num_channels):
-    return nn.Sequential(
-        nn.LazyBatchNorm2d(), nn.ReLU(),
-        nn.LazyConv2d(num_channels, kernel_size=1),
-        nn.AvgPool2d(kernel_size=2, stride=2)
-    )
-
-class DenseNet(nn.Module):
-    def __init__(self, num_channels=64, growth_rate=32, arch=(4,4,4,4),
-                 num_classes=10):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.LazyConv2d(64, kernel_size=5, stride=1, padding=2),
-            nn.LazyBatchNorm2d(), nn.ReLU(),
-            nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.embedding = nn.Sequential(
+            nn.LazyConv2d(out_channels=3, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.LazyConv2d(out_channels=6, kernel_size=1),
+            nn.ReLU(), nn.LazyBatchNorm2d(),
+            nn.Flatten()
         )
-        for i, num_convs in enumerate(arch):
-            self.net.add_module(
-                f'dense_blk{i}', DenseBlock(num_convs, growth_rate))
-            num_channels += num_convs * growth_rate
-            if i != len(arch) - 1:
-                num_channels //= 2
-                self.net.add_module(
-                    f'tran_blk{i}', transition_block(num_channels))
-        self.net.add_module('last', nn.Sequential(
-            nn.LazyBatchNorm2d(), nn.ReLU(),
-            nn.AdaptiveAvgPool2d((1, 1)), nn.Flatten(),
-            nn.LazyLinear(num_classes)
-        ))
-    def forward(self, X):
-        return self.net(X)
+        self.encoder_l = nn.TransformerEncoderLayer(d_model=6 * 28 * 28, nhead=4)
+        self.tsencoder = nn.TransformerEncoder(self.encoder_l, 3)
+        self.fc = nn.LazyLinear(10)
 
-model = DenseNet().to(device)
+    def forward(self, x):
+        x = self.embedding(x)
+        x = self.tsencoder(x)
+        x = self.fc(x)
+        return x
+
+model = tsMNIST().to(device)
 
 loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.002, momentum=0.5, dampening=0.5)
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.5, dampening=0.5)
 
 def train():
     size = len(train_dataset)
